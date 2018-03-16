@@ -30,9 +30,9 @@ public class ContextualDistances {
 	private static final int COLLECTION_SIZE = 20000;
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		ContextualDistances calc = new ContextualDistances("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/", "src/br/unicamp/ic/lis/rfrunner/clef.map");			
+		ContextualDistances calc = new ContextualDistances("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/", "src/br/unicamp/ic/lis/rfrunner/luciano.map");			
 		calc.run();
-		calc.calculateContext(3, 3);
+		calc.calculateContext(2, 6);
 		System.out.println("ok");
 	}
 
@@ -51,18 +51,23 @@ public class ContextualDistances {
 
 	/**
 	 * Build an image's KNN given its path and its amount of neighbors.
+	 * Obs: Both images that we are using to compute distances has to be filtered out from the set, considering that we can't take into account the distances to themselves.
 	 * @param imgRankPath the path from an image rank
 	 * @param K its amount of neighbors
 	 * @return an array with the ID's from an image's KNN in decreasing order
 	 */
-	private int[] buildKNN(String imgRankPath, int K) {
+	private int[] buildKNN(String imgRankPath, int K, int filter) {
 		int[] knn = new int[K];
 		try {
 			FileReader reader = new FileReader(imgRankPath);
 			BufferedReader buffer =  new BufferedReader(reader);
 			buffer.readLine(); // discard the distance to itself
 			for(int i =0; i < knn.length; i+= 1) {
-				knn[i] = Integer.parseInt(buffer.readLine());
+				int n = Integer.parseInt(buffer.readLine());
+				if(n == filter) {
+					n = Integer.parseInt(buffer.readLine());
+				}
+				knn[i] = n;
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -95,7 +100,9 @@ public class ContextualDistances {
 	}
 
 	/**
-	 *	Calculate the contextual distances for the given K values. 
+	 *	Calculate contextual distances for the given K values. 
+	 *	Obs: The starter value associated to Ks has to be bigger than 2 and the ending value Ke has to be lesser than (N-2) being N the size of the collection given the fact that
+	 *	when new distances are computed and a set of K nearest neighbors is built, two values are disregarded (two images that we are using to compute contextual distances)
 	 */
 	public void calculateContext(int Ks, int Ke) {
 		int K = Ks;
@@ -106,29 +113,31 @@ public class ContextualDistances {
 
 	/**
 	 *	Calculate new distances utilizing contextual re-rank.
-	 *	TODO write the output array to the respectively path 
+	 *	TODO Remove the extension "ppm.distbin" when concatenate the paths
 	 */
 	private void contextualRerank(int K) {
+		System.out.println("Para K ="+K);
 		String descriptorPath = this.DESCRIPTORS_MAP.substring(0,this.DESCRIPTORS_MAP.length()-16); // descriptor path		
 		long time = System.currentTimeMillis();
-		for(int d = 0; d < this.descriptorProperties.size()-1; d+=1) { // for each descriptor D
+		for(int d = 1; d < this.descriptorProperties.size(); d+=1) { // for each descriptor D
 			String descriptor = descriptorProperties.getProperty(Integer.toString(d));// gets the descriptor name
-			for(int l = COLLECTION_SIZE; l < COLLECTION_SIZE + 180; l += 1) { // for each imgL(topics) do:
-				double[] contextualDistances = new double[COLLECTION_SIZE];// collection size			
+			for(int l = 0; l < 1 ; l += 1) { // for each imgL(topics) do:
+				double[] contextualDistances = new double[8];// collection size			
 				String imgL = descriptorPath+"/"+descriptor+"/"+collectionProperties.getProperty(Integer.toString(l))+EXTENSION; // get imgL's path				
 				System.out.printf("Calculando contexto%n");
-				for(int i = 0; i < COLLECTION_SIZE; i++) { // for each imgI(collection) do: compute distance between L & I using contextual information
+				for(int i = 2; i < 3; i++) { // for each imgI(collection) do: compute distance between L & I using contextual information
 					if(i!= l) {
 						String imgI = descriptorPath+"/"+descriptor+"/"+collectionProperties.getProperty(Integer.toString(i))+EXTENSION; // get imgI's path
-						int[] knn = buildKNN(imgL+".rank",K); // build imgI's KNN
+						int[] knn = buildKNN(imgL+".rank",K,i); // build imgI's KNN
+						System.out.println(Arrays.toString(knn));
 						int ck = 0;
-						double dj = 0;
+						double dj = 0;						
 						for(int j : knn) {// for each imgJ((KNN)I) do : weighted sum of distance from imgI neighbors, to imgL												
 							dj = dj + dist(j,i,d) * (K - ck);
 							ck += 1;
 						}
 						double di = dist(i,l,d) / K; 
-						dj = dj / (K * (K - 1) / 2);
+						dj = dj / (K * (K + 1) / 2);
 						di = Math.pow(di, 2);
 						dj = Math.pow(dj,2);
 						contextualDistances[i] = Math.sqrt(di+dj); // recalculate distance from imgI to imgL
@@ -138,6 +147,7 @@ public class ContextualDistances {
 				System.out.println("Escrevendo arquivo");
 				System.out.println("feito");
 				write(contextualDistances,path);
+				System.out.println(Arrays.toString(contextualDistances));
 			}
 			System.out.println("["+"Descritor pronto: "+descriptorProperties.getProperty(Integer.toString(d))+"]");
 		}
@@ -158,8 +168,8 @@ public class ContextualDistances {
 			String imgJ = descriptorPath+"/"+descriptorName+"/"+collectionProperties.getProperty(Integer.toString(img1));
 			FileInputStream fis = new FileInputStream(imgJ+EXTENSION); // load the rank from imgJ
 			fis.skip(8*img2);
-			//			DataInputStream lis = new DataInputStream(fis);
-			LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
+						DataInputStream lis = new DataInputStream(fis);
+//			LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
 			val = lis.readDouble();
 			lis.close();
 			fis.close();
