@@ -11,11 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Properties;
 
 import com.mindprod.ledatastream.LEDataInputStream;
-import com.sun.javafx.scene.control.skin.ListCellSkin;
 
 public class ContextualDistances {
 
@@ -30,9 +28,11 @@ public class ContextualDistances {
 	private static final int COLLECTION_SIZE = 20000;
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		ContextualDistances calc = new ContextualDistances("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/", "src/br/unicamp/ic/lis/rfrunner/luciano.map");			
+		ContextualDistances calc = new ContextualDistances("/home/luciano/Desktop/ic/descriptors/", "src/br/unicamp/ic/lis/rfrunner/clef.map");			
 		calc.run();
-		calc.calculateContext(2, 6);
+		long time = System.currentTimeMillis();
+		calc.calculateContext(2, 10);
+		System.out.println("Tempo total:\t\t" + String.format("%.2f",(System.currentTimeMillis() - time)/1000.0/3600.0));					
 		System.out.println("ok");
 	}
 
@@ -113,27 +113,23 @@ public class ContextualDistances {
 
 	/**
 	 *	Calculate new distances utilizing contextual re-rank.
-	 *	TODO Remove the extension "ppm.distbin" when concatenate the paths
 	 */
 	private void contextualRerank(int K) {
-		System.out.println("Para K ="+K);
 		String descriptorPath = this.DESCRIPTORS_MAP.substring(0,this.DESCRIPTORS_MAP.length()-16); // descriptor path		
-		long time = System.currentTimeMillis();
-		for(int d = 1; d < this.descriptorProperties.size(); d+=1) { // for each descriptor D
+		for(int d = 0; d < this.descriptorProperties.size(); d+=1) { // for each descriptor D
 			String descriptor = descriptorProperties.getProperty(Integer.toString(d));// gets the descriptor name
-			for(int l = 0; l < 1 ; l += 1) { // for each imgL(topics) do:
-				double[] contextualDistances = new double[8];// collection size			
+			System.out.printf("Calculando contextos usando K = %d %n",K);
+			for(int l = COLLECTION_SIZE; l < COLLECTION_SIZE + 180 ; l += 1) { // for each imgL(topics) do:
+				double[] contextualDistances = new double[COLLECTION_SIZE];// collection size			
 				String imgL = descriptorPath+"/"+descriptor+"/"+collectionProperties.getProperty(Integer.toString(l))+EXTENSION; // get imgL's path				
-				System.out.printf("Calculando contexto%n");
-				for(int i = 2; i < 3; i++) { // for each imgI(collection) do: compute distance between L & I using contextual information
+				for(int i = 0; i < COLLECTION_SIZE; i++) { // for each imgI(collection) do: compute distance between L & I using contextual information
 					if(i!= l) {
 						String imgI = descriptorPath+"/"+descriptor+"/"+collectionProperties.getProperty(Integer.toString(i))+EXTENSION; // get imgI's path
-						int[] knn = buildKNN(imgL+".rank",K,i); // build imgI's KNN
-						System.out.println(Arrays.toString(knn));
+						int[] knn = buildKNN(imgI.substring(0,imgI.length()-12)+".rank",K,l); // build imgI's KNN
 						int ck = 0;
 						double dj = 0;						
 						for(int j : knn) {// for each imgJ((KNN)I) do : weighted sum of distance from imgI neighbors, to imgL												
-							dj = dj + dist(j,i,d) * (K - ck);
+							dj = dj + dist(j,l,d) * (K - ck);
 							ck += 1;
 						}
 						double di = dist(i,l,d) / K; 
@@ -144,15 +140,12 @@ public class ContextualDistances {
 					}
 				}
 				String path = imgL.substring(0, imgL.length()-12)+".cs_"+Integer.toString(K);
-				System.out.println("Escrevendo arquivo");
-				System.out.println("feito");
 				write(contextualDistances,path);
-				System.out.println(Arrays.toString(contextualDistances));
+				if(l % 10 == 0) // show the progress in a scale of 10 
+					System.out.println("["+"Distancias recalculadas: "+(l-COLLECTION_SIZE)+"/"+180+", descritor "+d+"/"+descriptorProperties.size()+"]");
 			}
 			System.out.println("["+"Descritor pronto: "+descriptorProperties.getProperty(Integer.toString(d))+"]");
-		}
-		
-		System.out.println("Tempo total:\t\t" + String.format("%.2f",(System.currentTimeMillis() - time)/1000.0/3600.0));			
+		}		
 	}
 
 	/**
@@ -168,8 +161,8 @@ public class ContextualDistances {
 			String imgJ = descriptorPath+"/"+descriptorName+"/"+collectionProperties.getProperty(Integer.toString(img1));
 			FileInputStream fis = new FileInputStream(imgJ+EXTENSION); // load the rank from imgJ
 			fis.skip(8*img2);
-						DataInputStream lis = new DataInputStream(fis);
-//			LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
+//						DataInputStream lis = new DataInputStream(fis);
+			LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
 			val = lis.readDouble();
 			lis.close();
 			fis.close();
