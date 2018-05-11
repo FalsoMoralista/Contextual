@@ -7,7 +7,7 @@ package contextual;
 
 /**
  *
- * @author luciano
+ * @author Luciano Araujo Dourado Filho
  */
 public class Contextual {
 
