@@ -6,12 +6,20 @@
 package util;
 
 import com.mindprod.ledatastream.LEDataInputStream;
+import com.mindprod.ledatastream.LEDataOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
+import java.util.stream.Stream;
 
 /**
  * Used to load distances matrixes.
@@ -23,8 +31,8 @@ public class MatrixLoader {
     }
 
     /**
-     * Returns a double matrix.
-     *
+     * Returns a double matrix (Read as little-endian).
+     *  
      * @param path
      * @param filePattern
      * @param rowNumber
@@ -32,7 +40,7 @@ public class MatrixLoader {
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static final double[][] matrixIO(String path, String filePattern, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+    public static final double[][] LEMatrixIO(String path, String filePattern, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
 
         double[][] matrix = new double[rowNumber][columNumber];
 
@@ -55,6 +63,37 @@ public class MatrixLoader {
 
             fis.close();
             inStream.close();
+        }
+
+        return matrix;
+    }
+    
+    /**
+     * Returns a double matrix (Read normally).
+     *  
+     * @param path
+     * @param filePattern
+     * @param rowNumber
+     * @param columNumber
+     * @return
+     * @throws java.io.FileNotFoundException
+     */
+    public static final double[][] NormMatrixIO(String path, String filePattern, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+
+        double[][] matrix = new double[rowNumber][columNumber];
+
+        File[] distbins = getFiles(path, filePattern); // get all files from the path
+
+        int distCounter = 0;
+
+        for (File f : distbins) { // for each file
+            double[] readyDistbin = readDistbin(f); // input its values
+
+            for (int i = 0; i < readyDistbin.length; i++) {
+                matrix[i][distCounter] = readyDistbin[i];
+            }
+            
+            distCounter++;
         }
 
         return matrix;
@@ -90,7 +129,7 @@ public class MatrixLoader {
     }
 
     /**
-     * Read as little ending.
+     * Read as little-endian.
      *
      * @param size
      * @param inputStream
@@ -109,27 +148,44 @@ public class MatrixLoader {
     }
 
     /**
-     * Read as big ending.
+     * Read normally.
      *
-     * @param size
-     * @param inputStream
+     * @param f
      * @return
      * @throws java.io.IOException
      */
-    public static double[] readDistbin(int size, BufferedReader inputStream) throws IOException {
+    public static double[] readDistbin(File f) throws IOException {
 
-        double[] arr = new double[size];
-
-        for (int i = 0; i < size; i++) {
-            arr[i] = Double.parseDouble(inputStream.readLine());
+        Path path = Paths.get(f.getPath());
+        
+        Stream<String> lines = Files.lines(path);
+        
+        Object[] allLines = lines.toArray();
+        
+        double[] arr = new double[allLines.length];
+        
+        for(int i =0; i < allLines.length; i++){
+            arr[i] = Double.parseDouble((String) allLines[i]);
         }
-
+        
         return arr;
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         System.out.println("Example:");
-        double[][] d = MatrixLoader.matrixIO("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics", "jpg.ppm.distbin", 20180, 180);
+//        double[] dist = readDistbin(20000, new LEDataInputStream(new FileInputStream(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.ppm.distbin"))));
+//        for(int i = 0; i < dist.length; i++){
+//            System.out.println(dist[i]);
+//        }
+//
+//        double[] distbin = readDistbin(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.cs_2"));
+//        LEDataOutputStream out = new LEDataOutputStream(new DataOutputStream(new FileOutputStream(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.ppm.distbin"))));
+//        for(int i = 0; i < distbin.length; i++){
+//            out.writeDouble(distbin[i]);
+//        }        
+        
+        
+        double[][] d = MatrixLoader.LEMatrixIO("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics", "jpg.ppm.distbin", 20180, 180);
         for (int i = 0; i < 20180; i++) {
             for (int j = 0; j < 180; j++) {
                 System.out.printf("[" + "%f" + "] ", d[i][j]);
