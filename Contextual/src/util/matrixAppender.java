@@ -59,18 +59,18 @@ public class matrixAppender {
 
         double[][] distbinMatrix = getDistbinMatrixFromDirectory("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics", "jpg.ppm.distbin", 20180, 180);
         
-        double[][] appended = append(distbinMatrix, normalMatrix, 20000, 20180, 0, 180);
+//        double[][] appended = append(distbinMatrix, normalMatrix, 20000, 20180, 0, 180);
 
         System.out.println("##################################################################################");
         System.out.println("##################################################################################");
         System.out.println("##################################################################################");
 
-        for (int i = 20000; i < 20180; i++) {
-            for (int j = 0; j < 180; j++) {
-                System.out.printf("[" + "%f" + "] ", appended[i][j]);
-            }
-            System.out.println("");
-        }
+//        for (int i = 20000; i < 20180; i++) {
+//            for (int j = 0; j < 180; j++) {
+//                System.out.printf("[" + "%f" + "] ", appended[i][j]);
+//            }
+//            System.out.println("");
+//        }
 
     }
 }

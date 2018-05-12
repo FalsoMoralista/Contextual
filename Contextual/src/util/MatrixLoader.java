@@ -18,11 +18,14 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 /**
  * Used to load distances matrixes.
+ *
  * @author Luciano Araujo Dourado Filho
  */
 public class MatrixLoader {
@@ -32,19 +35,19 @@ public class MatrixLoader {
 
     /**
      * Returns a double matrix (Read as little-endian).
-     *  
-     * @param path
-     * @param filePattern
+     *
+     * @param descriptorPath
+     * @param filter
      * @param rowNumber
      * @param columNumber
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static final double[][] LEMatrixIO(String path, String filePattern, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+    public static final double[][] LEMatrixIO(String descriptorPath, String filter, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
 
         double[][] matrix = new double[rowNumber][columNumber];
 
-        File[] distbins = getFiles(path, filePattern); // get all files from the path
+        File[] distbins = getFiles(descriptorPath, filter); // get all files from the path
 
         int distCounter = 0;
 
@@ -58,7 +61,7 @@ public class MatrixLoader {
             for (int i = 0; i < readyDistbin.length; i++) {
                 matrix[i][distCounter] = readyDistbin[i];
             }
-            
+
             distCounter++;
 
             fis.close();
@@ -67,22 +70,22 @@ public class MatrixLoader {
 
         return matrix;
     }
-    
+
     /**
      * Returns a double matrix (Read normally).
-     *  
-     * @param path
-     * @param filePattern
+     *
+     * @param descriptorPath
+     * @param filter
      * @param rowNumber
      * @param columNumber
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static final double[][] NormMatrixIO(String path, String filePattern, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+    public static final double[][] NormMatrixIO(String descriptorPath, String filter, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
 
         double[][] matrix = new double[rowNumber][columNumber];
 
-        File[] distbins = getFiles(path, filePattern); // get all files from the path
+        File[] distbins = getFiles(descriptorPath, filter); // get all files from the path
 
         int distCounter = 0;
 
@@ -92,7 +95,7 @@ public class MatrixLoader {
             for (int i = 0; i < readyDistbin.length; i++) {
                 matrix[i][distCounter] = readyDistbin[i];
             }
-            
+
             distCounter++;
         }
 
@@ -120,10 +123,32 @@ public class MatrixLoader {
         }
 
         File[] files = new File[relevant.size()];
-
         for (int i = 0; i < files.length; i++) {
             files[i] = relevant.get(i);
         }
+
+        return files;
+    }
+
+    public static File[] getFilesFromMap(String descriptorPath, String mapPath) throws FileNotFoundException, IOException {
+
+        Properties map = new Properties();
+
+        File f = new File(mapPath);
+
+        FileInputStream getMap = new FileInputStream(f);
+
+        map.load(getMap);
+
+        File[] files = new File[map.size()];
+
+        for (int i = 0; i < map.size(); i++) {
+            String CAT = descriptorPath + map.getProperty(Integer.toString(i));
+            File file = new File(CAT);
+            files[i] = file;
+        }
+
+        getMap.close();
 
         return files;
     }
@@ -157,17 +182,17 @@ public class MatrixLoader {
     public static double[] readDistbin(File f) throws IOException {
 
         Path path = Paths.get(f.getPath());
-        
+
         Stream<String> lines = Files.lines(path);
-        
+
         Object[] allLines = lines.toArray();
-        
+
         double[] arr = new double[allLines.length];
-        
-        for(int i =0; i < allLines.length; i++){
+
+        for (int i = 0; i < allLines.length; i++) {
             arr[i] = Double.parseDouble((String) allLines[i]);
         }
-        
+
         return arr;
     }
 
@@ -183,9 +208,8 @@ public class MatrixLoader {
 //        for(int i = 0; i < distbin.length; i++){
 //            out.writeDouble(distbin[i]);
 //        }        
-        
-        
-        double[][] d = MatrixLoader.LEMatrixIO("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics", "jpg.ppm.distbin", 20180, 180);
+
+        double[][] d = MatrixLoader.NormMatrixIO("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2", "jpg.cs_2", 20180, 180);
         for (int i = 0; i < 20180; i++) {
             for (int j = 0; j < 180; j++) {
                 System.out.printf("[" + "%f" + "] ", d[i][j]);
