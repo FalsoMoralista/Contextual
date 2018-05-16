@@ -1,6 +1,6 @@
 package contextual;
 
-import br.uefs.ecomp.contextual.LoadMap;
+import util.LoadMap;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

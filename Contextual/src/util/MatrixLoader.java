@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -72,6 +73,42 @@ public class MatrixLoader {
     }
 
     /**
+     * Returns a double matrix (Read as little-endian).
+     *
+     * @param extension
+     * @param distbins
+     * @param rowNumber
+     * @param columNumber
+     * @return
+     * @throws java.io.FileNotFoundException
+     */
+    public static final double[][] LEMatrixIO(File[] distbins, String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+
+        double[][] matrix = new double[rowNumber][columNumber];
+
+        int distCounter = 0;
+
+        for (File f : distbins) { // for each file
+
+            FileInputStream fis = new FileInputStream(new File(f.getPath() + extension));
+            LEDataInputStream inStream = new LEDataInputStream(fis); // create a stream to it
+
+            double[] readyDistbin = readDistbin(rowNumber, inStream); // input its values
+
+            for (int i = 0; i < readyDistbin.length; i++) {
+                matrix[i][distCounter] = readyDistbin[i];
+            }
+
+            distCounter++;
+
+            fis.close();
+            inStream.close();
+        }
+
+        return matrix;
+    }
+
+    /**
      * Returns a double matrix (Read normally).
      *
      * @param descriptorPath
@@ -91,6 +128,37 @@ public class MatrixLoader {
 
         for (File f : distbins) { // for each file
             double[] readyDistbin = readDistbin(f); // input its values
+
+            for (int i = 0; i < readyDistbin.length; i++) {
+                matrix[i][distCounter] = readyDistbin[i];
+            }
+
+            distCounter++;
+        }
+
+        return matrix;
+    }
+
+    /**
+     * Returns a double matrix (Read normally).
+     *
+     * @param extension
+     * @param distbins
+     * @param rowNumber
+     * @param columNumber
+     * @return
+     * @throws java.io.FileNotFoundException
+     */
+    public static final double[][] NormMatrixIO(File[] distbins, String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+
+        double[][] matrix = new double[rowNumber][columNumber];
+
+        int distCounter = 0;
+
+        for (File f : distbins) { // for each file
+            String path = f.getPath();
+            path = path.replaceAll(".ppm", ".cs_3");
+            double[] readyDistbin = readDistbin(new File(path + extension)); // input its values
 
             for (int i = 0; i < readyDistbin.length; i++) {
                 matrix[i][distCounter] = readyDistbin[i];
@@ -196,25 +264,53 @@ public class MatrixLoader {
         return arr;
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        System.out.println("Example:");
-//        double[] dist = readDistbin(20000, new LEDataInputStream(new FileInputStream(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.ppm.distbin"))));
-//        for(int i = 0; i < dist.length; i++){
-//            System.out.println(dist[i]);
-//        }
-//
-//        double[] distbin = readDistbin(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.cs_2"));
-//        LEDataOutputStream out = new LEDataOutputStream(new DataOutputStream(new FileOutputStream(new File("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2/31.jpg.ppm.distbin"))));
-//        for(int i = 0; i < distbin.length; i++){
-//            out.writeDouble(distbin[i]);
-//        }        
+    public static double[][] LEMatrixIOFromMap() {
+        return null;
+    }
 
-        double[][] d = MatrixLoader.NormMatrixIO("/home/luciano/Desktop/ic/Rodrigo/descriptors/acc/ic08topics_cs2", "jpg.cs_2", 20180, 180);
-        for (int i = 0; i < 20180; i++) {
-            for (int j = 0; j < 180; j++) {
-                System.out.printf("[" + "%f" + "] ", d[i][j]);
-            }
-            System.out.println("");
+    /**
+     * Writes a matrix column to a file.
+     *
+     * @param file
+     * @param rows
+     * @param column
+     * @param matrix
+     * @throws java.io.IOException
+     */
+    public static final void matrixOutput(File file, double[][] matrix, int rows, int column) throws IOException {
+
+        File newFile = new File(file.getPath()+".distbin");
+
+        FileOutputStream fos = new FileOutputStream(newFile);
+
+        DataOutputStream str = new DataOutputStream(fos);
+
+        LEDataOutputStream out = new LEDataOutputStream(str);
+
+        for (int i = 0; i < rows; i++) {
+            out.writeDouble(matrix[i][column]);
         }
+        
+        out.close();
+        str.close();
+        fos.close();
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        String descriptorPath = "/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/";
+        String mapPath = "/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/clef.map";
+        File[] files = MatrixLoader.getFilesFromMap(descriptorPath, mapPath);
+        files = Arrays.copyOfRange(files, 20000, 20180);
+        System.out.println(files[0]);
+//        double[][] d = MatrixLoader.NormMatrixIO(files, "", 20180, 180);
+        double[][] d = MatrixLoader.LEMatrixIO(files, ".distbin", 20180, 180);
+        System.out.println(d[20001][0]);
+//        double[][] d = MatrixLoader.NormMatrixIO("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/ic08topics_cs3", "jpg.cs_3", 20180, 180);
+//        for (int i = 0; i < 20180; i++) {
+//            for (int j = 0; j < 180; j++) {
+//                System.out.printf("[" + "%f" + "] ", d[i][j]);
+//            }
+//            System.out.println("");
+//        }
     }
 }

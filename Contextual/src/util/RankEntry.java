@@ -1,4 +1,4 @@
-package br.uefs.ecomp.contextual;
+package util;
 /**
  * 
  */
