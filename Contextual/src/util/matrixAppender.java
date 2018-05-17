@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * This will be used to append matrixes.
@@ -26,8 +27,8 @@ public class matrixAppender {
         return MatrixLoader.LEMatrixIO(path, fileFilter, rows, columns);
     }
     
-    public static final double[][] getFromTxT(File[] distbins, String extension, int rows, int columns) throws IOException{
-        return MatrixLoader.NormMatrixIO(distbins, extension, rows, columns);
+    public static final double[][] getFromTxT(File[] distbins, String context, String extension, int rows, int columns) throws IOException{
+        return MatrixLoader.NormMatrixIO(distbins, context,extension, rows, columns);
     }
     
     public static final double[][] getFromDistbin(File[] distbins, String extension, int rows, int columns) throws IOException{
@@ -62,7 +63,9 @@ public class matrixAppender {
         // faz o append dos topics na matriz de contexto
         // antes as matrizes de contexto so haviam 20k de itens
 //----------------------------------------------------------------------    
-        // para cada descritor:
+        // para cada descritor:        
+        
+        System.exit(0);
 
         String descriptorPath = "/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/"; // recebe um descritor
 
@@ -82,7 +85,7 @@ public class matrixAppender {
         
         files = Arrays.copyOfRange(files, 20000, 20180);// filtra o numero de arquivos que eu quero do mapa(so os topics)        
         
-        double[][] contextual = getFromTxT(files, "", 20180, 180); // carrega a matriz de contexto desse diretorio                        
+        double[][] contextual = getFromTxT(files, "","", 20180, 180); // carrega a matriz de contexto desse diretorio                        
         
         System.out.println("antes -> "+contextual[20001][0]);
         
@@ -90,9 +93,8 @@ public class matrixAppender {
         
         System.out.println("despues-> "+appended[20001][0]);
         
-        // TODO: escrever os arquivos em formato distbin em suas respectivas pastas.
-        for(int i = 0; i < files.length; i ++){
-            MatrixLoader.matrixOutput(files[i], appended,20180,i);                    
+        for(int i = 0; i < files.length; i ++){ 
+            MatrixLoader.matrixOutput(files[i], appended,20180,i);// escreve os arquivos em formato distbin                    
         }
     }
 }
