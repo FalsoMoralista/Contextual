@@ -149,7 +149,7 @@ public class MatrixLoader {
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static final double[][] NormMatrixIO(File[] distbins, String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+    public static final double[][] NormMatrixIO(File[] distbins, String context,String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
 
         double[][] matrix = new double[rowNumber][columNumber];
 
@@ -157,7 +157,7 @@ public class MatrixLoader {
 
         for (File f : distbins) { // for each file
             String path = f.getPath();
-            path = path.replaceAll(".ppm", ".cs_3");
+            path = path.replaceAll(".ppm", ".cs_"+context);
             double[] readyDistbin = readDistbin(new File(path + extension)); // input its values
 
             for (int i = 0; i < readyDistbin.length; i++) {
