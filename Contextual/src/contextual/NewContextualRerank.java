@@ -78,14 +78,14 @@ public class NewContextualRerank {
     }
 
     private void contextualRerank(int K) throws IOException {
-
+        System.out.println("K: "+K);
         for (int d = 0; d < 1/*descriptors.size()*/; d++) { // for each descriptor
+            
+            double[][] contextualMatrix = new double[COLLECTION_SIZE][180];
 
             for (int l = COLLECTION_SIZE - 180; l < COLLECTION_SIZE; l++) { // for each topic
 
-                double[][] contextualMatrix = new double[COLLECTION_SIZE][180];
-
-                for (int i = 0; i < 1/*COLLECTION_SIZE-180*/; i++) { // for each imgI(collection)
+                for (int i = 0; i < 1; i++) { // for each imgI(collection)
 
                     if (i != l) {// discard itself                        
 
@@ -128,19 +128,37 @@ public class NewContextualRerank {
                 Distbin topic = new Distbin(COLLECTION_SIZE, nTopic);
 
                 /**
-                 * Copy the original distances from the 180 topics to
-                 * the end of this new distbin.
+                 * Copy the original distances from the 180 topics to the end of
+                 * this new distbin.
                  */
                 for (int append = 20000; append < 20180; append++) {
                     contextualMatrix[append][l - 20000] = topic.get(append);
                 }
-                System.out.println("Calculado para: "+clef.getProperty(Integer.toString(l)));
-                System.out.println("Primeiro valor copiado para a matriz: "+contextualMatrix[20001][l-20000]);
-                System.out.println("Primeiro valor esperado lido do topic "+topic.getName()+": "+topic.get(20001));
+//                System.out.println("Calculado para: " + clef.getProperty(Integer.toString(l)));
+//                System.out.println("Primeiro valor copiado para a matriz: " + contextualMatrix[20001][l - 20000]);
+//                System.out.println("Primeiro valor esperado lido do topic " + topic.getName() + ": " + topic.get(20001));
+//                System.out.println("Primeiro valor" + contextualMatrix[0][l - 20000]);
             }
+            write(contextualMatrix,d,K);
         }
     }
 
+    private void write(double[][] contextualMatrix, int descriptor, int K) {
+
+        String descriptorName = descriptors.getProperty(Integer.toString(descriptor));
+        String descriptorBasePath = DATA_DIRECTORY+descriptorName+"/";
+        String folderName = "ic08topics_cs"+K;
+
+        File dir = new File(descriptorBasePath+"/"+folderName);
+        dir.mkdir();
+
+        for(int img = 0; img < clef.size(); img++){
+            File name = new File(dir.getPath()+clef.getProperty(Integer.toString(img)));
+            System.out.println(name.getPath());
+        }
+    }
+
+    
     private double dist(int img1, int img2, int descriptor) throws IOException {
 
         String currentDescriptor = descriptors.getProperty(Integer.toString(descriptor));
