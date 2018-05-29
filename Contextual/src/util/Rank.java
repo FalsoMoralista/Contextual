@@ -20,14 +20,29 @@ public class Rank {
     private LinkedList<RankEntry> rank;
 
     public Rank(Distbin d) {
-        this.rank = new LinkedList<>();
+        rank = new LinkedList<>();
         for (int i = 0; i < d.size(); i++) {
             RankEntry r = new RankEntry(i, d.get(i));
             rank.add(r);
         }
         Collections.sort(rank);
-        System.out.println(rank.get(2).getId());
-        System.out.println(rank.get(0).getDistanceTo());
+    }
+
+    /**
+     * Get the rank entry from a specific position.
+     *
+     * @param pos
+     * @return
+     */
+    public RankEntry get(int pos) {
+        return rank.get(pos);
+    }
+
+    /**
+     * Returns the current size of this rank.
+     */
+    public int size() {
+        return rank.size();
     }
 
     public static void main(String[] args) throws IOException {
@@ -35,7 +50,7 @@ public class Rank {
         String filename = "18777.jpg.ppm.distbin";
         File f = new File(path + filename);
         Distbin d = new Distbin(20180, f);
-        
         Rank r = new Rank(d);
+        System.out.println(r.get(0));
     }
 }

@@ -54,7 +54,10 @@ public class RankEntry implements Comparable<RankEntry> {
 
     @Override
     public String toString() {
-        return imgID;
+        if(imgID != null)
+            return imgID;
+        else
+            return Integer.toString(id);
     }
 
     /**

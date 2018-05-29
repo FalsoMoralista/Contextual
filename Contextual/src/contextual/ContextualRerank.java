@@ -107,6 +107,8 @@ public class ContextualRerank {
      * fact that when new distances are computed and a set of K nearest
      * neighbors is built, two values are disregarded (two images that we are
      * using to compute contextual distances)
+     * @param Ks
+     * @param Ke
      */
     public void calculateContext(int Ks, int Ke) {
         int K = Ks;
