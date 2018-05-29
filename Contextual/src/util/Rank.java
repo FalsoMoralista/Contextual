@@ -49,8 +49,8 @@ public class Rank {
         String path = "/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/18/";
         String filename = "18777.jpg.ppm.distbin";
         File f = new File(path + filename);
-        Distbin d = new Distbin(20180, f);
+        Distbin d = new Distbin(20000, f);
         Rank r = new Rank(d);
-        System.out.println(r.get(0));
+        System.out.println(r.get(1));
     }
 }

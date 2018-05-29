@@ -149,7 +149,7 @@ public class MatrixLoader {
      * @return
      * @throws java.io.FileNotFoundException
      */
-    public static final double[][] NormMatrixIO(File[] distbins, String context,String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
+    public static final double[][] NormMatrixIO(File[] distbins, String context, String extension, int rowNumber, int columNumber) throws FileNotFoundException, IOException {
 
         double[][] matrix = new double[rowNumber][columNumber];
 
@@ -157,7 +157,7 @@ public class MatrixLoader {
 
         for (File f : distbins) { // for each file
             String path = f.getPath();
-            path = path.replaceAll(".ppm", ".cs_"+context);
+            path = path.replaceAll(".ppm", ".cs_" + context);
             double[] readyDistbin = readDistbin(new File(path + extension)); // input its values
 
             for (int i = 0; i < readyDistbin.length; i++) {
@@ -269,6 +269,27 @@ public class MatrixLoader {
     }
 
     /**
+     *  Return the current line for a given distbin. 
+     * @param distbin
+     * @param line
+     * @return 
+     * @throws java.io.FileNotFoundException 
+     * @throws java.io.IOException 
+     */
+    public static double getLine(File distbin, int line) throws FileNotFoundException, IOException {
+
+        FileInputStream fis = new FileInputStream(distbin);
+        fis.skip(line * 8);
+
+        LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
+        double val = lis.readDouble();
+
+        lis.close();
+        fis.close();
+        return val;
+    }
+
+    /**
      * Writes a matrix column to a file.
      *
      * @param file
@@ -279,7 +300,7 @@ public class MatrixLoader {
      */
     public static final void matrixOutput(File file, double[][] matrix, int rows, int column) throws IOException {
 
-        File newFile = new File(file.getPath()+".distbin");
+        File newFile = new File(file.getPath() + ".distbin");
 
         FileOutputStream fos = new FileOutputStream(newFile);
 
@@ -290,7 +311,7 @@ public class MatrixLoader {
         for (int i = 0; i < rows; i++) {
             out.writeDouble(matrix[i][column]);
         }
-        
+
         out.close();
         str.close();
         fos.close();
