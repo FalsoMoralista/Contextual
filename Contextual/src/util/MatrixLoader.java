@@ -290,12 +290,12 @@ public class MatrixLoader {
     }
 
     /**
-     * Writes a matrix column to a file.
+     * Writes a double matrixes column to a distbin file.
      *
-     * @param file
-     * @param rows
-     * @param column
-     * @param matrix
+     * @param file the output file
+     * @param rows the amount of rows
+     * @param column the specific column
+     * @param matrix the matrix
      * @throws java.io.IOException
      */
     public static final void matrixOutput(File file, double[][] matrix, int rows, int column) throws IOException {

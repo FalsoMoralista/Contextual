@@ -1,3 +1,13 @@
-0=bic
-1=luciano
-2=qcch
+0=ccom
+1=acc
+2=jackard_descricao
+3=las
+4=cos_descricao
+5=okapi_descricao
+6=bow_descricao
+7=gch
+8=tfidf_descricao
+9=bic
+10=jac
+11=dice_descricao
+12=qcch

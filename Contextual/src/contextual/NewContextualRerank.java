@@ -78,14 +78,18 @@ public class NewContextualRerank {
     }
 
     private void contextualRerank(int K) throws IOException {
-        System.out.println("K: "+K);
-        for (int d = 0; d < 1/*descriptors.size()*/; d++) { // for each descriptor
-            
+        
+        System.out.println("Executando com K = " + K);
+        
+        for (int d = 0; d < descriptors.size(); d++) { // for each descriptor
+
+            System.out.println("Descritor :"+descriptors.getProperty(Integer.toString(d)));
+
             double[][] contextualMatrix = new double[COLLECTION_SIZE][180];
 
             for (int l = COLLECTION_SIZE - 180; l < COLLECTION_SIZE; l++) { // for each topic
 
-                for (int i = 0; i < 1; i++) { // for each imgI(collection)
+                for (int i = 0; i < COLLECTION_SIZE - 180; i++) { // for each imgI(collection)
 
                     if (i != l) {// discard itself                        
 
@@ -114,11 +118,10 @@ public class NewContextualRerank {
                         dj = Math.pow(dj, 2);
 
                         contextualMatrix[i][l - 20000] = Math.sqrt(di + dj); // recalculate distance from imgI to imgL                        
-//                        System.out.println("i :" + i);
-//                        System.out.println("l :" + l);
-//                        System.out.println("result: " + contextualMatrix[i][l - 20000]);
                     }
                 }
+                System.out.println("Feito. Total: " + (l - 20000) + "/" + (COLLECTION_SIZE - 20000));
+               
                 String topicImg = clef.getProperty(Integer.toString(l));
 
                 String currentDescriptor = descriptors.getProperty(Integer.toString(d));
@@ -131,34 +134,42 @@ public class NewContextualRerank {
                  * Copy the original distances from the 180 topics to the end of
                  * this new distbin.
                  */
+                System.out.println("Fazendo apppend");
                 for (int append = 20000; append < 20180; append++) {
                     contextualMatrix[append][l - 20000] = topic.get(append);
                 }
-//                System.out.println("Calculado para: " + clef.getProperty(Integer.toString(l)));
-//                System.out.println("Primeiro valor copiado para a matriz: " + contextualMatrix[20001][l - 20000]);
-//                System.out.println("Primeiro valor esperado lido do topic " + topic.getName() + ": " + topic.get(20001));
-//                System.out.println("Primeiro valor" + contextualMatrix[0][l - 20000]);
+                System.out.println("ok");
             }
-            write(contextualMatrix,d,K);
+            write(contextualMatrix, d, K);
         }
     }
 
-    private void write(double[][] contextualMatrix, int descriptor, int K) {
+    private void write(double[][] contextualMatrix, int descriptor, int K) throws IOException {
+
+        System.out.println("Escrevendo arquivo");
 
         String descriptorName = descriptors.getProperty(Integer.toString(descriptor));
-        String descriptorBasePath = DATA_DIRECTORY+descriptorName+"/";
-        String folderName = "ic08topics_cs"+K;
 
-        File dir = new File(descriptorBasePath+"/"+folderName);
+        String descriptorBasePath = DATA_DIRECTORY + descriptorName + "/";
+
+        String folderName = "ic08topics_cs" + K + "/";
+
+        File dir = new File(descriptorBasePath + "/" + folderName);
+        
         dir.mkdir();
 
-        for(int img = 0; img < clef.size(); img++){
-            File name = new File(dir.getPath()+clef.getProperty(Integer.toString(img)));
-            System.out.println(name.getPath());
+        for (int img = 20000; img < clef.size(); img++) {
+
+            String currentImg = clef.getProperty(Integer.toString(img));
+
+            currentImg = currentImg.replace("ic08topics", "");
+            
+            File name = new File(dir.getPath() + currentImg + "/");
+
+            MatrixLoader.matrixOutput(name, contextualMatrix, 20180, img - 20000);
         }
     }
 
-    
     private double dist(int img1, int img2, int descriptor) throws IOException {
 
         String currentDescriptor = descriptors.getProperty(Integer.toString(descriptor));
@@ -201,7 +212,7 @@ public class NewContextualRerank {
 
     public static void main(String[] args) throws IOException {
         NewContextualRerank rerank = new NewContextualRerank();
-        rerank.contextualRerank(3, 3);
+        rerank.contextualRerank(2, 10);
 //        Distbin dist = new Distbin(20180, new File("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/18/18777.jpg.ppm.distbin"));
 //        int knn[] = rerank.buildKNN(3, 839, getRank(dist));
 //        System.out.println("KNN:");

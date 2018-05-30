@@ -94,7 +94,7 @@ public class matrixAppender {
         System.out.println("despues-> "+appended[20001][0]);
         
         for(int i = 0; i < files.length; i ++){ 
-            MatrixLoader.matrixOutput(files[i], appended,20180,i);// escreve os arquivos em formato distbin                    
+//            MatrixLoader.matrixOutput(files[i], appended,20180,i);// escreve os arquivos em formato distbin                    
         }
     }
 }
