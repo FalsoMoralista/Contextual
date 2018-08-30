@@ -18,7 +18,7 @@ import util.Rank;
  *
  * @author Luciano Araujo Dourado Filho
  */
-public class NewContextualRerank {
+public class IterativeContextualRerank {
 
     private final String DATA_DIRECTORY;
     private final String MAP_FILE;
@@ -29,7 +29,7 @@ public class NewContextualRerank {
     private Properties clef;
     private Properties descriptors;
 
-    public NewContextualRerank() throws FileNotFoundException, IOException {
+    public IterativeContextualRerank() throws FileNotFoundException, IOException {
         properties = new Properties();
         clef = new Properties();
         descriptors = new Properties();
@@ -78,12 +78,12 @@ public class NewContextualRerank {
     }
 
     private void contextualRerank(int K) throws IOException {
-        
+
         System.out.println("Executando com K = " + K);
-        
+
         for (int d = 0; d < descriptors.size(); d++) { // for each descriptor
 
-            System.out.println("Descritor :"+descriptors.getProperty(Integer.toString(d)));
+            System.out.println("Descritor :" + descriptors.getProperty(Integer.toString(d)));
 
             double[][] contextualMatrix = new double[COLLECTION_SIZE][180];
 
@@ -121,7 +121,7 @@ public class NewContextualRerank {
                     }
                 }
                 System.out.println("Feito. Total: " + (l - 20000) + "/" + (COLLECTION_SIZE - 20000));
-               
+
                 String topicImg = clef.getProperty(Integer.toString(l));
 
                 String currentDescriptor = descriptors.getProperty(Integer.toString(d));
@@ -155,7 +155,7 @@ public class NewContextualRerank {
         String folderName = "ic08topics_cs" + K + "/";
 
         File dir = new File(descriptorBasePath + "/" + folderName);
-        
+
         dir.mkdir();
 
         for (int img = 20000; img < clef.size(); img++) {
@@ -163,7 +163,7 @@ public class NewContextualRerank {
             String currentImg = clef.getProperty(Integer.toString(img));
 
             currentImg = currentImg.replace("ic08topics", "");
-            
+
             File name = new File(dir.getPath() + currentImg + "/");
 
             MatrixLoader.matrixOutput(name, contextualMatrix, 20180, img - 20000);
@@ -210,14 +210,41 @@ public class NewContextualRerank {
         return knn;
     }
 
+    public void buildWorkspace(int Ks, int Ke, int descriptor) throws IOException {
+        System.out.println("Building workspace ...");
+        
+        String descriptorName = descriptors.getProperty(Integer.toString(descriptor));
+
+        String path = DATA_DIRECTORY + descriptorName + '/' + "cs" + Ks + '_' + Ke;
+
+        String absPath = DATA_DIRECTORY + descriptorName + '/';
+
+        String csDir = '/' + "cs" + Ks + '_' + Ke;
+
+        File f = new File(path);
+
+        if (!f.exists()) {
+            System.out.println("Creating file under "+ path);
+            f.mkdir();
+            cloneOrginalMatrix(absPath, csDir);
+        }
+    }
+    
+    private void cloneOrginalMatrix(String absolutePath, String csDirectory) throws IOException{
+
+        System.out.println("Cloning original distances ...");
+        
+        System.out.println(absolutePath);
+
+        System.out.println(csDirectory);
+        
+        String cmd[] = { absolutePath + "copy.sh", absolutePath + "ic08topics",csDirectory };
+
+        Runtime.getRuntime().exec(cmd);
+    }
+
     public static void main(String[] args) throws IOException {
-        NewContextualRerank rerank = new NewContextualRerank();
-        rerank.contextualRerank(2, 10);
-//        Distbin dist = new Distbin(20180, new File("/media/luciano/530492be-a614-4aca-b8cd-036f158e2080/ic/www.recod.ic.unicamp.br/~rtripodi/ic08tarballs/bic/18/18777.jpg.ppm.distbin"));
-//        int knn[] = rerank.buildKNN(3, 839, getRank(dist));
-//        System.out.println("KNN:");
-//        for(int i = 0; i < knn.length; i++){
-//            System.out.println(knn[i]);
-//        }
+        IterativeContextualRerank rerank = new IterativeContextualRerank();
+        rerank.buildWorkspace(1, 1, 0);
     }
 }
