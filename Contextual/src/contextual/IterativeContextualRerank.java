@@ -232,13 +232,9 @@ public class IterativeContextualRerank {
     
     private void cloneOrginalMatrix(String absolutePath, String csDirectory) throws IOException{
 
-        System.out.println("Cloning original distances ...");
-        
-        System.out.println(absolutePath);
-
-        System.out.println(csDirectory);
-        
-        String cmd[] = { absolutePath + "copy.sh", absolutePath + "ic08topics",csDirectory };
+        System.out.println("Cloning original distbins into workspace...");
+                
+        String cmd[] = { "src/resources/scripts/" + "copy.sh", absolutePath + "ic08topics",csDirectory };
 
         Runtime.getRuntime().exec(cmd);
     }
