@@ -34,17 +34,17 @@ public class IterativeContextualRerank {
         clef = new Properties();
         descriptors = new Properties();
 
-        File f = new File("src/resources/properties/contextual.properties");
+        File f = new File("resources/properties/contextual.properties");
         properties.load(new FileInputStream(f));
 
         DATA_DIRECTORY = properties.getProperty("DATA_DIRECTORY");
         COLLECTION_SIZE = Integer.parseInt(properties.getProperty("COLLECTION_SIZE"));
         MAP_FILE = properties.getProperty("MAP_FILE");
 
-        f = new File("src/resources/maps/clef.map");
+        f = new File("resources/maps/clef.map");
         clef.load(new FileInputStream(f));
 
-        f = new File("src/resources/maps/descriptors.map");
+        f = new File("resources/maps/descriptors.map");
         descriptors.load(new FileInputStream(f));
     }
 
@@ -68,12 +68,15 @@ public class IterativeContextualRerank {
      *
      * @param Ks
      * @param Ke
+     * @param descriptor
      * @throws java.io.IOException
      */
-    public void contextualRerank(int Ks, int Ke) throws IOException {
+    public void contextualRerank(int Ks, int Ke, int descriptor) throws IOException {
+       // buildWorkspace(Ks, Ke, descriptor);
         int K = Ks;
+        System.out.println("Starting iterative contextual rerank parameters: Ks: "+'['+Ks+']'+" Ke: "+'['+Ke+']'+" Descriptor: "+ descriptors.getProperty(Integer.toString(descriptor)));
         while (K <= Ke) {
-            contextualRerank(K++);
+//            contextualRerank(K++);
         }
     }
 
@@ -101,7 +104,7 @@ public class IterativeContextualRerank {
 
                         Distbin distbin = new Distbin(COLLECTION_SIZE - 180, f);
 
-                        Rank rank = getRank(distbin);
+                        Rank rank = getRank(distbin); // ineficiente (sao realizadas varias ordenacoes desnecessariamente)
 
                         int[] knn = buildKNN(K, l, rank);
 
@@ -212,7 +215,7 @@ public class IterativeContextualRerank {
 
     public void buildWorkspace(int Ks, int Ke, int descriptor) throws IOException {
         System.out.println("Building workspace ...");
-        
+
         String descriptorName = descriptors.getProperty(Integer.toString(descriptor));
 
         String path = DATA_DIRECTORY + descriptorName + '/' + "cs" + Ks + '_' + Ke;
@@ -224,23 +227,30 @@ public class IterativeContextualRerank {
         File f = new File(path);
 
         if (!f.exists()) {
-            System.out.println("Creating file under "+ path);
+            System.out.println("Creating file under " + path);
             f.mkdir();
             cloneOrginalMatrix(absPath, csDir);
         }
     }
-    
-    private void cloneOrginalMatrix(String absolutePath, String csDirectory) throws IOException{
+
+    private void cloneOrginalMatrix(String absolutePath, String csDirectory) throws IOException {
 
         System.out.println("Cloning original distbins into workspace...");
-                
-        String cmd[] = { "src/resources/scripts/" + "copy.sh", absolutePath + "ic08topics",csDirectory };
+
+        String cmd[] = {"resources/scripts/" + "copy.sh", absolutePath + "ic08topics", csDirectory};
 
         Runtime.getRuntime().exec(cmd);
     }
 
     public static void main(String[] args) throws IOException {
+        if (args.length == 0) {
+            System.out.println("Usage:");
+            System.out.println("arg0 = descriptor id");
+            System.out.println("arg1 = Ks");
+            System.out.println("arg2 = Ke");
+        }
         IterativeContextualRerank rerank = new IterativeContextualRerank();
-        rerank.buildWorkspace(1, 1, 0);
+        rerank.contextualRerank(1, 1, 0);
+
     }
 }
