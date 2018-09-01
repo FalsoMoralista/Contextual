@@ -72,12 +72,43 @@ public class IterativeContextualRerank {
      * @throws java.io.IOException
      */
     public void contextualRerank(int Ks, int Ke, int descriptor) throws IOException {
-       // buildWorkspace(Ks, Ke, descriptor);
+
+        buildWorkspace(Ks, Ke, descriptor);
+
         int K = Ks;
-        System.out.println("Starting iterative contextual rerank parameters: Ks: "+'['+Ks+']'+" Ke: "+'['+Ke+']'+" Descriptor: "+ descriptors.getProperty(Integer.toString(descriptor)));
-        while (K <= Ke) {
+
+        System.out.println("Starting iterative contextual rerank parameters: Ks: " + '[' + Ks + ']' + " Ke: " + '[' + Ke + ']' + " Descriptor: " + descriptors.getProperty(Integer.toString(descriptor)));
+
+        double matrix[][] = new double[COLLECTION_SIZE][180];
+
+        File path = new File("/home/luciano/ic/descritores/ccom/cs1_1");
+
+        loadMatrix(matrix, path, COLLECTION_SIZE, 180);
+        
+//        while (K <= Ke) {
 //            contextualRerank(K++);
+//              contextualRerank(int descriptor, int);
+//        }
+    }
+
+    private void loadMatrix(double[][] matrix, File path, int amntRows, int amntColumns) throws IOException {
+        System.out.println("Loading distbins...");
+        int matrixPos = 0;
+        for (int line = 20000; line < clef.size(); line++) {
+
+            StringBuilder builder = new StringBuilder();
+            String currentDistbin = clef.getProperty(Integer.toString(line));
+            builder.append(path.getPath()).append(currentDistbin.substring(currentDistbin.indexOf('/'), currentDistbin.length())).append(EXT);
+
+            File distbin = new File(builder.toString());
+            Distbin dist = new Distbin(20000, distbin);
+
+            for (int row = 0; row < dist.size(); row++) {
+                matrix[row][matrixPos] = dist.get(row);
+            }
+            matrixPos++;
         }
+        System.out.println("Done loading");
     }
 
     private void contextualRerank(int K) throws IOException {

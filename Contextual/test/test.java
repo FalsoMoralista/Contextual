@@ -1,0 +1,23 @@
+
+import java.io.File;
+import java.io.IOException;
+import util.Distbin;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author luciano
+ */
+public class test {
+    public static void main(String[] args) throws IOException {
+        Distbin d = new Distbin(11, new File("/home/luciano/ic/descritores/ccom/cs1_1/4947.jpg.ppm.distbin"));
+        for (int i = 0; i < 10; i++) {
+            System.out.println(d.get(i));
+        }
+    }
+}
