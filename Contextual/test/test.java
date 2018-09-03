@@ -9,16 +9,17 @@ import util.Rank;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author luciano
  */
 public class test {
+
     public static void main(String[] args) throws IOException {
-        Distbin d = new Distbin(11, new File("/home/luciano/ic/descritores/ccom/cs1_1/4947.jpg.ppm.distbin"));
+        Distbin d = new Distbin(20000, new File("/home/luciano/ic/descritores/ccom/cs1_1/4947.jpg.ppm.distbin"));
         Rank r = new Rank(d);
         for (int i = 0; i < 10; i++) {
+//            System.out.println(d.get(i));
             System.out.println(r.get(i).getDistanceTo());
         }
     }
