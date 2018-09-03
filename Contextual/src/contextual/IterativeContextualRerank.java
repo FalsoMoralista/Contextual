@@ -85,6 +85,7 @@ public class IterativeContextualRerank {
 
         loadMatrix(matrix, path, COLLECTION_SIZE, 180);
         
+        contextualRerank(descriptor, Ks, Ke, matrix, K);
 //        while (K <= Ke) {
 //            contextualRerank(K++);
 //              contextualRerank(int descriptor, int);
@@ -111,71 +112,77 @@ public class IterativeContextualRerank {
         System.out.println("Done loading");
     }
 
-    private void contextualRerank(int K) throws IOException {
+    private void contextualRerank(int descriptor, int Ks, int Ke, double[][] matrix, int K) throws IOException {
 
-        System.out.println("Executando com K = " + K);
+        String dScriptor = descriptors.getProperty(Integer.toString(descriptor));
 
-        for (int d = 0; d < descriptors.size(); d++) { // for each descriptor
+        System.out.println("Descritor :" + dScriptor);
 
-            System.out.println("Descritor :" + descriptors.getProperty(Integer.toString(d)));
+        Rank[] rankings = new Rank[180];
 
-            double[][] contextualMatrix = new double[COLLECTION_SIZE][180];
+        rankUp(rankings, matrix);
 
-            for (int l = COLLECTION_SIZE - 180; l < COLLECTION_SIZE; l++) { // for each topic
+        for (int i = 0; i < 10; i++) {
+            System.out.println(rankings[0].get(i).getDistanceTo());
+        } 
+        
+        System.exit(0);
+        
+        for (int l = COLLECTION_SIZE - 180; l < COLLECTION_SIZE; l++) { // for each topic
 
-                for (int i = 0; i < COLLECTION_SIZE - 180; i++) { // for each imgI(collection)
+            for (int i = 0; i < COLLECTION_SIZE - 180; i++) { // for each imgI(collection)
 
-                    if (i != l) {// discard itself                        
+                if (i != l) {// discard itself                        
 
-                        String currentDescriptor = descriptors.getProperty(Integer.toString(d));
+                    String currentDescriptor = descriptors.getProperty(Integer.toString(descriptor));
 
-                        String currentIMG = clef.getProperty(Integer.toString(i));
+                    String currentIMG = clef.getProperty(Integer.toString(i));
 
-                        File f = new File(DATA_DIRECTORY + currentDescriptor + "/" + currentIMG + EXT);
+                    File f = new File(DATA_DIRECTORY + currentDescriptor + "/" + currentIMG + EXT);
 
-                        Distbin distbin = new Distbin(COLLECTION_SIZE - 180, f);
+                    Distbin distbin = new Distbin(COLLECTION_SIZE - 180, f);
 
-                        Rank rank = getRank(distbin); // ineficiente (sao realizadas varias ordenacoes desnecessariamente)
+                    Rank rank = getRank(distbin); // ineficiente (sao realizadas varias ordenacoes desnecessariamente)
 
-                        int[] knn = buildKNN(K, l, rank);
+                    int[] knn = buildKNN(K, l, rank);
 
-                        int ck = 0;
-                        double dj = 0;
-                        for (int j : knn) {// for each imgJ((KNN)I) do : weighted sum of distance from imgI neighbors, to imgL												
-                            dj = dj + dist(j, l, d) * (K - ck);
-                            ck += 1;
-                        }
-
-                        double di = dist(i, l, d) / K;
-                        dj = dj / (K * (K + 1) / 2);
-                        di = Math.pow(di, 2);
-                        dj = Math.pow(dj, 2);
-
-                        contextualMatrix[i][l - 20000] = Math.sqrt(di + dj); // recalculate distance from imgI to imgL                        
+                    int ck = 0;
+                    double dj = 0;
+                    for (int j : knn) {// for each imgJ((KNN)I) do : weighted sum of distance from imgI neighbors, to imgL												
+                        dj = dj + dist(j, l, descriptor) * (K - ck);
+                        ck += 1;
                     }
+
+                    double di = dist(i, l, descriptor) / K;
+                    dj = dj / (K * (K + 1) / 2);
+                    di = Math.pow(di, 2);
+                    dj = Math.pow(dj, 2);
+
+                    matrix[i][l - 20000] = Math.sqrt(di + dj); // recalculate distance from imgI to imgL                        
                 }
-                System.out.println("Feito. Total: " + (l - 20000) + "/" + (COLLECTION_SIZE - 20000));
-
-                String topicImg = clef.getProperty(Integer.toString(l));
-
-                String currentDescriptor = descriptors.getProperty(Integer.toString(d));
-
-                File nTopic = new File(DATA_DIRECTORY + currentDescriptor + "/" + topicImg + EXT);
-
-                Distbin topic = new Distbin(COLLECTION_SIZE, nTopic);
-
-                /**
-                 * Copy the original distances from the 180 topics to the end of
-                 * this new distbin.
-                 */
-                System.out.println("Fazendo apppend");
-                for (int append = 20000; append < 20180; append++) {
-                    contextualMatrix[append][l - 20000] = topic.get(append);
-                }
-                System.out.println("ok");
             }
-            write(contextualMatrix, d, K);
+            System.out.println("Feito. Total: " + (l - 20000) + "/" + (COLLECTION_SIZE - 20000));
+
+            String topicImg = clef.getProperty(Integer.toString(l));
+
+            String currentDescriptor = descriptors.getProperty(Integer.toString(descriptor));
+
+            File nTopic = new File(DATA_DIRECTORY + currentDescriptor + "/" + topicImg + EXT);
+
+            Distbin topic = new Distbin(COLLECTION_SIZE, nTopic);
+
+            /**
+             * Copy the original distances from the 180 topics to the end of
+             * this new distbin.
+             */
+            System.out.println("Fazendo apppend");
+            for (int append = 20000; append < 20180; append++) {
+                matrix[append][l - 20000] = topic.get(append);
+            }
+            System.out.println("ok");
         }
+        write(matrix, descriptor, K);
+
     }
 
     private void write(double[][] contextualMatrix, int descriptor, int K) throws IOException {
@@ -283,5 +290,20 @@ public class IterativeContextualRerank {
         IterativeContextualRerank rerank = new IterativeContextualRerank();
         rerank.contextualRerank(1, 1, 0);
 
+    }
+
+    private void rankUp(Rank[] rank, double[][] matrix) {
+
+        for (int column = 0; column < 180; column++) {
+
+            double[] values = new double[20000];
+
+            for (int row = 0; row < 20000; row++) {
+                values[row] = matrix[row][column];                
+            }
+            Distbin d = new Distbin(values);
+            Rank r = new Rank(d);
+            rank[column] = r;
+        }
     }
 }

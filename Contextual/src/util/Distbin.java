@@ -29,6 +29,11 @@ public class Distbin {
         str.close();
     }
 
+    public Distbin(double[] values) {
+        distbin = new double[values.length];
+        System.arraycopy(values, 0, distbin, 0, values.length);
+    }
+
     /**
      *  Returns the current value for a given position. 
      * @param pos
