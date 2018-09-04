@@ -49,16 +49,6 @@ public class IterativeContextualRerank {
     }
 
     /**
-     * Return the rank for a distbin.
-     *
-     * @param d
-     * @return
-     */
-    public static Rank getRank(Distbin d) {
-        return new Rank(d);
-    }
-
-    /**
      * Calculate contextual distances for the given K values. Obs: The starter
      * value associated to Ks has to be bigger than 2 and the ending value Ke
      * has to be lesser than (N-2) being N the size of the collection given the
@@ -128,8 +118,12 @@ public class IterativeContextualRerank {
         System.out.println("Descritor :" + dScriptor);
 
         Rank[] rankings = new Rank[180];
+                
+        rank(rankings, matrix); // sort ranked lists
 
-        rankUp(rankings, matrix); // sort the ranked lists
+        System.out.println(rankings[0].get(19999).getDistanceTo());
+        
+        System.exit(0);
         
         for (int l = 20000/*COLLECTION_SIZE - 180 */; l < 20180/*COLLECTION_SIZE*/; l++) { // for each topic (matrix columns)
 
@@ -143,13 +137,13 @@ public class IterativeContextualRerank {
 
                     Distbin distbin = new Distbin(COLLECTION_SIZE - 180, f);
 
-                    Rank rank = getRank(distbin); // ineficiente (sao realizadas varias ordenacoes desnecessariamente)
+                    Rank rank = rankings[l]; 
 
                     int[] knn = buildKNN(K, l, rank);
 
                     int ck = 0;
                     double dj = 0;
-                    for (int j : knn) {// for each imgJ((KNN)I) do : weighted sum of distance from imgI neighbors, to imgL												
+                    for (int j : knn) {// for each imgJ((KNN)L) do : weighted sum of distance from imgL neighbors, to imgI												
                         dj = dj + dist(j, l, descriptor) * (K - ck);
                         ck += 1;
                     }
@@ -293,7 +287,7 @@ public class IterativeContextualRerank {
 
     }
 
-    private void rankUp(Rank[] rank, double[][] matrix) {
+    private void rank(Rank[] rank, double[][] matrix) {
 
         for (int column = 0; column < 180; column++) {
 
