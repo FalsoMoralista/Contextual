@@ -260,7 +260,8 @@ public class MatrixLoader {
 
         return arr;
     }
-
+    
+    @Deprecated
     public static double[][] LEMatrixIOFromMap() {
         return null;
     }
@@ -275,14 +276,13 @@ public class MatrixLoader {
      */
     public static double getLine(File distbin, int line) throws FileNotFoundException, IOException {
 
-        FileInputStream fis = new FileInputStream(distbin);
-        fis.skip(line * 8);
-
-        LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
-        double val = lis.readDouble();
-
-        lis.close();
-        fis.close();
+        double val;
+        try (FileInputStream fis = new FileInputStream(distbin)) {
+            fis.skip(line * 8);
+            LEDataInputStream lis = new LEDataInputStream(fis); // usar caso little ending
+            val = lis.readDouble();
+            lis.close();
+        }
         return val;
     }
 

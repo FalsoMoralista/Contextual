@@ -16,10 +16,10 @@ import util.Rank;
 public class test {
 
     public static void main(String[] args) throws IOException {
-        Distbin d = new Distbin(20000, new File("/home/luciano/ic/descritores/ccom/cs1_1/4947.jpg.ppm.distbin"));        System.out.println(d.get(19999));
+        Distbin d = new Distbin(20000, new File("/home/luciano/ic/descritores/ccom/cs1_1/4947.jpg.ppm.distbin"));
+        System.out.println(d.get(11240));
         Rank r = new Rank(d);
-        System.out.println(r.get(19999).getDistanceTo());
-        
+
 //        for (int i = 0; i < 10; i++) {
 //            System.out.println(d.get(i));
 //            System.out.println(r.get(i).getDistanceTo());
