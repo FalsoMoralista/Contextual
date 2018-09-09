@@ -270,15 +270,14 @@ public class IterativeContextualRerank {
         IterativeContextualRerank rerank = new IterativeContextualRerank();
         if (args.length == 0) {
             System.out.println("Usage:");
-            System.out.println("arg0 = descriptor id");
-            System.out.println("arg1 = Ks");
-            System.out.println("arg2 = Ke");
+            System.out.println("arg0 = Ks");
+            System.out.println("arg1 = Ke");
+            System.out.println("arg2 = descriptor id");
         } else {
-            int[] arg = new int[3];
-            arg[0] = Integer.parseInt(args[0]);
-            arg[1] = Integer.parseInt(args[1]);
-            arg[2] = Integer.parseInt(args[2]);
-            rerank.contextualRerank(arg[0], arg[1], arg[0]);
+            int arg0 = Integer.parseInt(args[0]);
+            int arg1 = Integer.parseInt(args[1]);
+            int arg2 = Integer.parseInt(args[2]);
+            rerank.contextualRerank(arg0, arg1, arg2);
         }
     }
 }
