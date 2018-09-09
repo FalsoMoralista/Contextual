@@ -63,8 +63,6 @@ public class IterativeContextualRerank {
      */
     public void contextualRerank(int Ks, int Ke, int descriptor) throws IOException {
 
-        buildWorkspace(Ks, Ke, descriptor);
-
         int K = Ks;
 
         System.out.println("Starting iterative contextual rerank parameters: Ks: " + '[' + Ks + ']' + " Ke: " + '[' + Ke + ']' + " Descriptor: " + descriptors.getProperty(Integer.toString(descriptor)));
@@ -74,23 +72,19 @@ public class IterativeContextualRerank {
         String dScriptor = descriptors.getProperty(Integer.toString(descriptor)); // get the descriptor passed by parameter
 
         System.out.println("Descriptor :" + dScriptor);
-        
-        File path = new File(DATA_DIRECTORY + dScriptor+ '/' +"cs" + Ks + '_'+Ke);
+
+        File path = new File(DATA_DIRECTORY + dScriptor + "/ic08topics");
 
         loadMatrix(matrix, path, COLLECTION_SIZE, 180);
 
-        System.out.println("Evaluating reranking img 4947");
-        
-        System.out.println("Original distance to img 18777: " + matrix[0][0]);
+        File output = new File(DATA_DIRECTORY + dScriptor + '/');
 
         while (K <= Ke) {
-            contextualRerank(descriptor, Ks, Ke, matrix, K++);
-            System.out.println("Redefined distance for iteration ["+ K +"] to img 18777: " + matrix[0][0]);
+            contextualRerank(descriptor, Ks, Ke, matrix, K);
+            write(matrix, output, Ks, K);
+            K++;
         }
 
-        System.out.println("Final distance to img 18777: " + matrix[0][0]);
-
-        //write(matrix, descriptor, K);
     }
 
     /**
@@ -98,7 +92,6 @@ public class IterativeContextualRerank {
      * distances to other images.
      */
     private void loadMatrix(double[][] matrix, File path, int amntRows, int amntColumns) throws IOException {
-
         System.out.println("Loading distbins...");
 
         int column = 0;
@@ -123,17 +116,17 @@ public class IterativeContextualRerank {
 
     private void contextualRerank(int descriptor, int Ks, int Ke, double[][] matrix, int K) throws IOException {
 
-        System.out.println("Executing... K = "+K);
-        
+        System.out.println("Executing... K = " + K);
+
         String dScriptor = descriptors.getProperty(Integer.toString(descriptor)); // get the descriptor passed by parameter
 
         Rank[] rankings = new Rank[180];
 
         rank(rankings, matrix); // sort ranked lists
 
-        for (int l = 20000/*COLLECTION_SIZE - 180 */; l < 20001/*COLLECTION_SIZE*/; l++) { // for each topic (matrix columns)
+        for (int l = COLLECTION_SIZE - 180; l < COLLECTION_SIZE; l++) { // for each topic (matrix columns)
 
-            for (int i = 0; i < 20000/*COLLECTION_SIZE - 180 */; i++) { // for each imgI (matrix rows)
+            for (int i = 0; i < COLLECTION_SIZE - 180; i++) { // for each imgI (matrix rows)
 
                 if (i != l) {// discard itself                        
 
@@ -154,7 +147,7 @@ public class IterativeContextualRerank {
                         ck++;
                     }
 
-                    double di = /*dist(i, l, descriptor)*/ matrix[i][l - 20000] / K;
+                    double di = matrix[i][l - 20000] / K;
                     dj = dj / (K * (K + 1) / 2);
                     di = Math.pow(di, 2);
                     dj = Math.pow(dj, 2);
@@ -166,17 +159,13 @@ public class IterativeContextualRerank {
         }
     }
 
-    private void write(double[][] contextualMatrix, int descriptor, int K) throws IOException {
+    private void write(double[][] contextualMatrix, File path, int Ks, int Ke) throws IOException {
 
-        System.out.println("Escrevendo arquivo");
+        System.out.println("Writing files...");
 
-        String descriptorName = descriptors.getProperty(Integer.toString(descriptor));
+        String folderName = "_cs" + Ks + '_' + Ke;
 
-        String descriptorBasePath = DATA_DIRECTORY + descriptorName + "/";
-
-        String folderName = "ic08topics_cs" + K + "/";
-
-        File dir = new File(descriptorBasePath + "/" + folderName);
+        File dir = new File(path.getPath() + folderName);
 
         dir.mkdir();
 
@@ -278,13 +267,18 @@ public class IterativeContextualRerank {
     }
 
     public static void main(String[] args) throws IOException {
+        IterativeContextualRerank rerank = new IterativeContextualRerank();
         if (args.length == 0) {
             System.out.println("Usage:");
             System.out.println("arg0 = descriptor id");
             System.out.println("arg1 = Ks");
             System.out.println("arg2 = Ke");
+        } else {
+            int[] arg = new int[3];
+            arg[0] = Integer.parseInt(args[0]);
+            arg[1] = Integer.parseInt(args[1]);
+            arg[2] = Integer.parseInt(args[2]);
+            rerank.contextualRerank(arg[0], arg[1], arg[0]);
         }
-        IterativeContextualRerank rerank = new IterativeContextualRerank();
-        rerank.contextualRerank(1, 3, 0);
     }
 }
