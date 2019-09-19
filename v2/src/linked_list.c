@@ -1,41 +1,67 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-typedef struct {
+typedef struct Node{
     void *data;
     struct Node *next;
-
 }Node;
 
 
-typedef struct{
+typedef struct List{
     int size;
-    struct Node *head;    
+    struct Node *head;  
 }List;
 
 
-static void AddElement(Node *element, List *l) {
-    if (l->size == 0){
-        l->head = element;
+void AddElement(Node *n, List *l){
+    if (l->size==0){      
+        l->head = n;
+        l->head->next = NULL; 
         l->size += 1;
     }else {
-        l->head->next = element;
+        Node *aux = (Node*)malloc(sizeof(Node));        
+        Node *ant;
+        ant = l->head;
+        aux = l->head->next;
+        while(aux != NULL){
+            ant = aux;
+            aux = aux->next;        
+        }
+        n->next = NULL;
+        ant->next = n;
         l->size += 1;
     }    
 }
 
 static List *NewList(){
-    List *l = sizeof(List);
+    List *l = (List*)malloc(sizeof(List));
     l->head = NULL;
     l->size = 0;
     return l;
 }
 
+void print(List *l){
+        Node *aux = (Node*)malloc(sizeof(Node));        
+        Node *ant;
+        aux = l->head;
+        while(aux != NULL){
+            printf("%lf\n",*(double*)aux->data);
+            ant = aux;
+            aux = aux->next;        
+        }
+}
+
 int main(int argc, char const *argv[])
 {
     List *l = NewList();
-    Node *n = sizeof(Node);
-    n->data = 1;
-    AddElement(n,l);   
-    printf(l->size);
+    for (int ctr = 0; ctr < 5; ctr++) {
+        Node *n = (Node*)malloc(sizeof(Node));
+        double d = 1.3352 + ctr;
+        n->data = &d;
+        AddElement(n,l);   
+    }
+    print(l);
+    printf("Tamanho: %d\n",l->size);
     return 0;
 }
+
