@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "linked_list.c"
 
 
 /**
@@ -15,6 +17,7 @@ int build_kNN(int K, int filter, float tensor[]){
     int pos = 0;
     int aux = 1;
     while (pos<K){
+        
 
     }
     
@@ -22,7 +25,9 @@ int build_kNN(int K, int filter, float tensor[]){
 }
 int main(int argc, char const *argv[])
 {
-    /* code */
-    printf("ola world");
+    List *l  = NewList();
+    l->AddElement(10.01,l);
+    print(l);
+    printf("ola gente bon diah\n");
     return 0;
 }
