@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "linked_list.c"
-
+#include "distbin.c"
 
 /**
 *   Build an image's kNN given its amount of neightbors.
@@ -22,36 +22,18 @@
 // }
 
 int main(int argc, char const *argv[]) {
-    // List *l  = NewList();
-    // l->AddElement(10.01,l);
-    // l->AddElement(10.02,l);
-    // print(l);
-    // printf("ola gente bon diah\n");
     FILE *pointer;
     pointer = fopen("../../Contextual/resources/images/16672.jpg.ppm.distbin","r");
     if(!pointer){
         printf("Unable to access \n");
     }else
     {
-    
-    double *dataset[180][20180] = (double*)malloc(sizeof(double [180][20180]));
-
-        for (int image = 0; image < 1; image++) {
-            for (int line = 0; line < 20180; line++) {
-                char bytes[8];
-                fread(&bytes, sizeof(bytes), line+1, pointer);
-                double d = *((double*)bytes);
-                printf("%lf\n",d);
-//               dataset[image][line] = d;
-            }
-        }    
-
-        // for (int image = 0; image < 1; image++) {
-        //     for (int line = 0; line < 11; line++) {
-        //         printf("%lf\n",dataset[image][line]);
-        //     }
-        // }       
-
+        Distbin *distbin = NewDistbin(pointer, distbin);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("Value 0 : %lf\n",distbin->distances[i]);
+        }
+        
     }    
     return 0;
 }
