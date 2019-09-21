@@ -33,6 +33,7 @@ int main(int argc, char const *argv[]) {
         {
             printf("Value 0 : %lf\n",distbin->distances[i]);
         }
+        printf("%lu\n",sizeof(distbin->distances)/8);
         
     }    
     return 0;
