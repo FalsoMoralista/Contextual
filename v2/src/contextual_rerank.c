@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "linked_list.c"
-#include "distbin.c"
 #include "rank.c"
 
 /**
@@ -30,9 +28,14 @@ int main(int argc, char const *argv[]) {
     }else
     {
         Distbin *distbin = NewDistbin(pointer, distbin);
-        Rank *r = NewRank(distbin);
-        for (int i = 0; i < 11; i++){
-            printf("Val: %lf\n",r->rank[i]->distance);
+        // for (int i = 0; i < 20180; i++)
+        // {
+            printf("Distancia: %lf\n",distbin->distances[20107]);
+        // }
+        
+        Rank r = NewRank(distbin);
+        for (int i = 0; i < 100; i++){
+            printf("Val: %lf\n",r.entries[i].distance);
         }    
     }    
     return 0;

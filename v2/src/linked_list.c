@@ -13,7 +13,7 @@ typedef struct List {
     void (*AddElement)(double d,struct List *l); 
 }List;
 
-static void  AddElement(double d, List *l);
+// static void  AddElement(double d, List *l);
 
 static void AddElement(double d, List *l) {
     Node *n = (Node*)malloc(sizeof(Node));    
@@ -54,14 +54,14 @@ void print(List *l) {
         }
 }
 
-// int main(int argc, char const *argv[]) {
-//     List *l = NewList();
-//     for (int ctr = 0; ctr < 100; ctr++) {
-//         double d = 1.0342 + ctr;
-//         AddElement(d,l);   
-//     }   
-//     print(l);
-//     printf("Tamanho: %d\n",l->size);
-//     return 0;
-// }
+void test(int argc, char const *argv[]) {
+    List *l = NewList();
+    for (int ctr = 0; ctr < 100; ctr++) {
+        double d = 1.0342 + ctr;
+        AddElement(d,l);   
+    }   
+    print(l);
+    printf("Tamanho: %d\n",l->size);
+    return 0;
+}
 
