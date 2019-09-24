@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "linked_list.c"
 #include "distbin.c"
+#include "rank.c"
 
 /**
 *   Build an image's kNN given its amount of neightbors.
@@ -29,12 +30,10 @@ int main(int argc, char const *argv[]) {
     }else
     {
         Distbin *distbin = NewDistbin(pointer, distbin);
-        for (int i = 0; i < 10; i++)
-        {
-            printf("Value 0 : %lf\n",distbin->distances[i]);
-        }
-        printf("%lu\n",sizeof(distbin->distances)/8);
-        
+        Rank *r = NewRank(distbin);
+        for (int i = 0; i < 11; i++){
+            printf("Val: %lf\n",r->rank[i]->distance);
+        }    
     }    
     return 0;
 }
