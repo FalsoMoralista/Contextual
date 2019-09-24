@@ -28,15 +28,7 @@ int main(int argc, char const *argv[]) {
     }else
     {
         Distbin *distbin = NewDistbin(pointer, distbin);
-        // for (int i = 0; i < 20180; i++)
-        // {
-            printf("Distancia: %lf\n",distbin->distances[20107]);
-        // }
-        
-        Rank r = NewRank(distbin);
-        for (int i = 0; i < 100; i++){
-            printf("Val: %lf\n",r.entries[i].distance);
-        }    
+        Rank r = NewRank(distbin);        
     }    
     return 0;
 }
