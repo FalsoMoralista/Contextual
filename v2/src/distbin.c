@@ -5,10 +5,9 @@ const unsigned short int _SIZE_ = 20180;
 
 typedef struct Distbin{
     double distances[_SIZE_];
-    char *id;
+    int *id;
 
 }Distbin;
-
 
 Distbin *NewDistbin(FILE *f, Distbin *d){
     d = (Distbin*)malloc(sizeof(Distbin));

@@ -12,10 +12,10 @@ typedef struct Rank {
 
 int compare_to(const void * elem1, const void * elem2) 
 {
-    double f = *((double*)elem1);
-    double s = *((double*)elem2);
-    if (f > s) return  1;
-    if (f < s) return -1;
+    RankEntry r1 = *(RankEntry*)elem1;
+    RankEntry r2 = *(RankEntry*)elem2;
+    if (r1.distance > r2.distance) return  1;
+    if (r1.distance < r2.distance) return -1;
     return 0;
 }
 
@@ -38,9 +38,11 @@ Rank NewRank(Distbin *d){
         RankEntry r = {i,d->distances[i]};
         entries[i] = r;
     }        
-    qsort(entries,size,sizeof(entries),compare_to);
+
+   qsort(entries,size,sizeof(RankEntry),compare_to);
     Rank r = {entries};
+   for (int i = 0; i < 150; i++){
+       printf("Distances: %lf\n",entries[i].distance);
+   }        
     return r;
 }
-
-   

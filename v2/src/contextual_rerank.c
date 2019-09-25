@@ -28,6 +28,7 @@ int main(int argc, char const *argv[]) {
     }else
     {
         Distbin *distbin = NewDistbin(pointer, distbin);
+        printf("˜here we go again˜\n");
         Rank r = NewRank(distbin);        
     }    
     return 0;
