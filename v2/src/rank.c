@@ -38,11 +38,7 @@ Rank NewRank(Distbin *d){
         RankEntry r = {i,d->distances[i]};
         entries[i] = r;
     }        
-
-   qsort(entries,size,sizeof(RankEntry),compare_to);
+    qsort(entries,size,sizeof(RankEntry),compare_to);
     Rank r = {entries};
-   for (int i = 0; i < 150; i++){
-       printf("Distances: %lf\n",entries[i].distance);
-   }        
     return r;
 }
