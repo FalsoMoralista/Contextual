@@ -112,29 +112,31 @@ int main(int argc, char const *argv[])
         int arg0 = atoi(argv[1]);
         int arg1 = atoi(argv[2]);
         int arg2 = atoi(argv[3]);
+
+        FILE *config;
+        config = fopen("contextual.cfg", "r");
+        if (!config)
+        {
+            printf("Unable to access \n");
+        }
+        else
+        {
+            // todo open configuration file, load descriptor from command line argument then iterate over files
+            Distbin *distbin = NewDistbin(pointer, distbin);
+            printf("˜here we go again˜\n");
+            Rank r = NewRank(distbin);
+            for (int i = 0; i < 8; i++)
+            {
+                printf("Distance:%lf\n", r.entries[i].distance);
+                printf("Id: %d\n", r.entries[i].id);
+            }
+            int *knn = buildKNN(7, 16672, 9739, r);
+            for (int i = 0; i < 7; i++)
+            {
+                printf("Id knn[%d](img 16672): %d\n", i, knn[i]);
+            }
+        }
     }
 
-    FILE *pointer;
-    pointer = fopen("../../Contextual/resources/images/16672.jpg.ppm.distbin", "r");
-    if (!pointer)
-    {
-        printf("Unable to access \n");
-    }
-    else
-    {
-        Distbin *distbin = NewDistbin(pointer, distbin);
-        printf("˜here we go again˜\n");
-        Rank r = NewRank(distbin);
-        for (int i = 0; i < 8; i++)
-        {
-            printf("Distance:%lf\n", r.entries[i].distance);
-            printf("Id: %d\n", r.entries[i].id);
-        }
-        int *knn = buildKNN(7, 16672, 9739, r);
-        for (int i = 0; i < 7; i++)
-        {
-            printf("Id knn[%d](img 16672): %d\n", i, knn[i]);
-        }
-    }
     return 0;
 }
